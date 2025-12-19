@@ -1,20 +1,23 @@
 const Product = require('../Models/Product');
+const { uploadToCloudinary } = require('../config/cloudinary');
 
 // Create a new product
 const createProduct = async (req, res) => {
   try {
     const { categoryId, subCategoryId, productName, description, status } = req.body;
-    const image = req.file ? req.file.path : null;
 
-    if (!image) {
+    if (!req.file) {
       return res.status(400).json({ message: 'Image is required' });
     }
+
+    // Upload image to Cloudinary
+    const imageUrl = await uploadToCloudinary(req.file.buffer);
 
     const product = new Product({
       categoryId,
       subCategoryId,
       productName,
-      image,
+      image: imageUrl,
       description,
       status
     });
@@ -81,11 +84,13 @@ const getProductById = async (req, res) => {
 const updateProduct = async (req, res) => {
   try {
     const { categoryId, subCategoryId, productName, description, status } = req.body;
-    const image = req.file ? req.file.path : undefined; // Only update if new image provided
 
     const updateData = { categoryId, subCategoryId, productName, description, status };
-    if (image) {
-      updateData.image = image;
+
+    if (req.file) {
+      // Upload new image to Cloudinary
+      const imageUrl = await uploadToCloudinary(req.file.buffer);
+      updateData.image = imageUrl;
     }
 
     const product = await Product.findByIdAndUpdate(

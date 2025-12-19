@@ -1,17 +1,20 @@
 const Blog = require('../Models/Blog');
+const { uploadToCloudinary } = require('../config/cloudinary');
 
 // Create a new blog
 const createBlog = async (req, res) => {
   try {
     const { title, shortDescription, status } = req.body;
-    const image = req.file ? req.file.path : null;
 
-    if (!image) {
+    if (!req.file) {
       return res.status(400).json({ message: 'Image is required' });
     }
 
+    // Upload image to Cloudinary
+    const imageUrl = await uploadToCloudinary(req.file.buffer, 'anjana-blogs');
+
     const blog = new Blog({
-      image,
+      image: imageUrl,
       title,
       shortDescription,
       status
@@ -51,11 +54,13 @@ const getBlogById = async (req, res) => {
 const updateBlog = async (req, res) => {
   try {
     const { title, shortDescription, status } = req.body;
-    const image = req.file ? req.file.path : undefined; // Only update if new image provided
 
     const updateData = { title, shortDescription, status };
-    if (image) {
-      updateData.image = image;
+
+    if (req.file) {
+      // Upload new image to Cloudinary
+      const imageUrl = await uploadToCloudinary(req.file.buffer, 'anjana-blogs');
+      updateData.image = imageUrl;
     }
 
     const blog = await Blog.findByIdAndUpdate(
