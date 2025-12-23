@@ -1,5 +1,5 @@
 const express = require('express');
-const { createAdmin, loginAdmin } = require('../Controller/adminController');
+const { createAdmin, loginAdmin, getTotals } = require('../Controller/adminController');
 
 const router = express.Router();
 
@@ -8,5 +8,8 @@ router.post('/create', createAdmin);
 
 // POST /admin/login
 router.post('/login', loginAdmin);
+
+// GET /admin/totals
+router.get('/totals', getTotals);
 
 module.exports = router;

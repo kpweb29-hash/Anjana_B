@@ -1,4 +1,6 @@
 const Admin = require('../Models/Admin');
+const Product = require('../Models/Product');
+const Blog = require('../Models/Blog');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -54,7 +56,24 @@ const loginAdmin = async (req, res) => {
   }
 };
 
+const getTotals = async (req, res) => {
+  try {
+    const totalProducts = await Product.countDocuments();
+    const totalBlogs = await Blog.countDocuments();
+    const totalAdmins = await Admin.countDocuments();
+
+    res.status(200).json({
+      totalProducts,
+      totalBlogs,
+      totalAdmins
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
 module.exports = {
   createAdmin,
-  loginAdmin
+  loginAdmin,
+  getTotals
 };
